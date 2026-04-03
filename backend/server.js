@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/storyforge', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('MongoDB Connected')).catch(err => console.error(err));
