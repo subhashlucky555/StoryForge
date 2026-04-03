@@ -14,7 +14,7 @@ StoryForge is an immersive, interactive fiction platform designed to transform r
 - **Divergence Tracking:** Easily see your current path versus unexplored branches.
 - **Quick-Jump:** Click any node on the map to teleport back to that exact story moment (with divergence warnings).
 
-🔊 **Immersive AudioBook Mode (100% Local)**
+🔊 **Immersive AudioBook Mode**
 - **Voice Selection:** Choose from a dynamic list of voices available natively on your device.
 - **Word-by-Word Glow:** A hybrid tracking system guarantees smooth, real-time text highlighting that follows the audio perfectly, even if the browser drops native events.
 - **Volume Control:** Dedicated slider to adjust audio levels (0% to 200%).
