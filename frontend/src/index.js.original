@@ -1,0 +1,138 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
+
+const AuthContext = createContext();
+
+export const useAuth = () => useContext(AuthContext);
+
+const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    if (token && savedUser) {
+      setUser(JSON.parse(savedUser));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+    setLoading(false);
+  }, []);
+
+  const login = (token, userData) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
+};
+
+const Navbar = () => {
+  const { user, logout } = useAuth();
+  return (
+    <nav className="glass-card" style={{ 
+      position: 'fixed', top: '1rem', left: '1rem', right: '1rem', 
+      zIndex: 1000, padding: '0.8rem 2rem', display: 'flex', 
+      justifyContent: 'space-between', alignItems: 'center' 
+    }}>
+      <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }} className="gradient-text">
+        StoryForge
+      </div>
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+        <a href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</a>
+        <a href="/library" style={{ color: 'inherit', textDecoration: 'none' }}>Library</a>
+        {user ? (
+          <>
+            <a href="/create" style={{ color: 'inherit', textDecoration: 'none' }}>Create</a>
+            <button onClick={logout} className="glass-card" style={{ padding: '0.5rem 1rem' }}>Logout</button>
+          </>
+        ) : (
+          <a href="/auth" className="glass-card" style={{ padding: '0.5rem 1rem', textDecoration: 'none', color: 'inherit' }}>Join Now</a>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+const LandingPage = () => {
+  const navigate = useNavigate();
+  return (
+    <div style={{ 
+      position: 'relative', minHeight: '100vh', 
+      display: 'flex', flexDirection: 'column', 
+      justifyContent: 'center', alignItems: 'center', 
+      textAlign: 'center', overflow: 'hidden'
+    }}>
+      {/* Background Hero Image with Overlay */}
+      <div style={{ 
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+        backgroundImage: `url(${storyHeroImage})`, 
+        backgroundSize: 'cover', backgroundPosition: 'center', 
+        zIndex: -1, 
+        filter: 'brightness(0.3)' 
+      }} />
+      
+      <div className="animate-fade-in" style={{ maxWidth: '800px', padding: '0 2rem' }}>
+        <h1 style={{ fontSize: '4.5rem', marginBottom: '1.5rem', fontWeight: 'bold' }}>
+          Craft Your <span className="gradient-text">Legend</span>
+        </h1>
+        <p style={{ fontSize: '1.4rem', color: 'var(--text-secondary)', marginBottom: '3rem', lineHeight: '1.6' }}>
+          Step into a world where your choices forge the path. 
+          Become the author of your own epic destiny.
+        </p>
+        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+          <button 
+            className="glass-card" 
+            style={{ 
+              padding: '1.2rem 3rem', background: 'var(--primary-gradient)', 
+              color: 'white', fontWeight: 'bold', fontSize: '1.1rem' 
+            }}
+            onClick={() => navigate('/library')}
+          >
+            Begin Journey
+          </button>
+          <button 
+            className="glass-card" 
+            style={{ padding: '1.2rem 3rem', fontSize: '1.1rem' }}
+            onClick={() => navigate('/create')}
+          >
+            Start Writing
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/library" element={<StoryLibrary />} />
+          <Route path="/story/:id" element={<StoryReader />} />
+          <Route path="/create" element={<StoryEditor />} />
+          <Route path="/auth" element={<AuthPage />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
+};
+
+export default App;
